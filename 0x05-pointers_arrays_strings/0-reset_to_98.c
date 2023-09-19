@@ -1,8 +1,7 @@
 #include "main.h"
-
 /**
- * main - Entry point
- * @n: number
+ * reset_to_98 - updates the value of a variable to 98
+ * @n: variable to be updated
  * Return: 0
  */
 

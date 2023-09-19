@@ -1,9 +1,8 @@
 #include "main.h"
-
 /**
- * main - Entry point
- * @a: number
- * @b: number2
+ * swap_int - swaps two integers
+ * @a: first integer to be swapped
+ * @b: second integer to be swapped
  * Return: 0
  */
 
