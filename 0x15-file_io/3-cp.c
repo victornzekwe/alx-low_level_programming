@@ -1,123 +1,73 @@
-#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 
+void check_IO_stat(int stat, int fd, char *filename, char mode);
 /**
- * main - Entry point of the program
+ * main - copies the content of one file to another
  * @argc: argument count
- * @argv: argument vector
- * Return: Success (0)
+ * @argv: arguments passed
+ *
+ * Return: 1 on success, exit otherwise
  */
-
 int main(int argc, char *argv[])
 {
-	char *buffer;
-	int source_fd;
-	int dest_fd;
+	int src, dest, n_read = 1024, wrote, close_src, close_dest;
+	unsigned int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
+	char buffer[1024];
 
 	if (argc != 3)
 	{
-		dprintf(STDERR_FILENO, "Usage: %s source_file dest_file\n", argv[0]);
+		dprintf(STDERR_FILENO, "%s", "Usage: cp file_from file_to\n");
 		exit(97);
 	}
-	buffer = malloc(BUFFER_SIZE);
-	if (buffer == NULL)
+	src = open(argv[1], O_RDONLY);
+	check_IO_stat(src, -1, argv[1], 'O');
+	dest = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, mode);
+	check_IO_stat(dest, -1, argv[2], 'W');
+	while (n_read == 1024)
 	{
-		return (-1);
+		n_read = read(src, buffer, sizeof(buffer));
+		if (n_read == -1)
+			check_IO_stat(-1, -1, argv[1], 'O');
+		wrote = write(dest, buffer, n_read);
+		if (wrote == -1)
+			check_IO_stat(-1, -1, argv[2], 'W');
 	}
-	source_fd = open_source_file(argv[1]);
-	dest_fd = open_dest_file(argv[2]);
-	copy_file(source_fd, dest_fd, buffer, argv[1], argv[2]);
-	close_file(source_fd);
-	close_file(dest_fd);
-	free(buffer);
+	close_src = close(src);
+	check_IO_stat(close_src, src, NULL, 'C');
+	close_dest = close(dest);
+	check_IO_stat(close_dest, dest, NULL, 'C');
 	return (0);
 }
 
 /**
- * open_source_file - function to open source file
- * @source_file: the second argument in the command line
- * Return: fd
+ * check_IO_stat - checks if a file can be opened or closed
+ * @stat: file descriptor of the file to be opened
+ * @filename: name of the file
+ * @mode: closing or opening
+ * @fd: file descriptor
+ *
+ * Return: void
  */
-
-int open_source_file(char *source_file)
+void check_IO_stat(int stat, int fd, char *filename, char mode)
 {
-	int fd;
-
-	fd = open(source_file, O_RDONLY);
-	if (fd == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", source_file);
-		exit(98);
-	}
-	return (fd);
-}
-
-/**
- * open_dest_file - function to open the destination file
- * @dest_file: the third argument in the command line
- * Return: fd
- */
-
-int open_dest_file(char *dest_file)
-{
-	int fd;
-
-	fd = open(dest_file, O_WRONLY | O_CREAT | O_TRUNC, 0664);
-	if (fd == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", dest_file);
-		exit(99);
-	}
-	return (fd);
-}
-
-/**
- * close_file - function to close the files
- * @fd: file description parameter
- */
-
-void close_file(int fd)
-{
-	int result;
-
-	result = close(fd);
-	if (result == -1)
+	if (mode == 'C' && stat == -1)
 	{
 		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
 		exit(100);
 	}
-}
-
-/**
- * copy_file - function to copy the files
- * @source_fd: source fd
- * @dest_fd: destination fd
- * @buffer: buffer to hold the value while coping
- * @source_file: source file (argv[1])
- * @dest_file: destination file (argv[2])
- */
-
-void copy_file(int source_fd, int dest_fd,
-		char *buffer, char *source_file, char *dest_file)
-{
-	int bytes_read, bytes_written;
-
-	bytes_read = 0;
-	bytes_written = 0;
-	while ((bytes_read = read(source_fd, buffer, BUFFER_SIZE)) > 0)
+	else if (mode == 'O' && stat == -1)
 	{
-		if (bytes_read < BUFFER_SIZE)
-			bytes_written = write(dest_fd, buffer, bytes_read);
-		else
-			bytes_written = write(dest_fd, buffer, BUFFER_SIZE);
-		if (bytes_written == -1)
-		{
-			dprintf(STDERR_FILENO, "Error: Can't write to %s\n", dest_file);
-			exit(99);
-		}
-	}
-	if (bytes_read == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", source_file);
+		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", filename);
 		exit(98);
+	}
+	else if (mode == 'W' && stat == -1)
+	{
+		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", filename);
+		exit(99);
 	}
 }
