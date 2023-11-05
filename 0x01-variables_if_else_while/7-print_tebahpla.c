@@ -2,16 +2,17 @@
 
 /**
  * main - Entry point
- * putchar - prints to the output
- * Return: 0 (Success)
+ * putchar - Prints the output
+ * Return:  0 (Success)
  */
 int main(void)
 {
-	char letter;
+	char letter = 'z';
 
-	for (letter = 'a'; letter <= 'z'; letter++)
+	while (letter >= 'a')
 	{
 		putchar(letter);
+		letter--;
 	}
 	putchar('\n');
 	return (0);

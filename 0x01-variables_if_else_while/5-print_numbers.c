@@ -2,16 +2,17 @@
 
 /**
  * main - Entry point
- * putchar - prints to the output
+ * printf - Prints the output
  * Return: 0 (Success)
  */
 int main(void)
 {
-	char letter;
+	int num = 0;
 
-	for (letter = 'a'; letter <= 'z'; letter++)
+	while (num <= 9)
 	{
-		putchar(letter);
+		printf("%d", num);
+		num++;
 	}
 	putchar('\n');
 	return (0);

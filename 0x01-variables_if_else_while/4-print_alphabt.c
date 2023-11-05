@@ -2,7 +2,7 @@
 
 /**
  * main - Entry point
- * putchar - prints to the output
+ * putchar - Prints the output
  * Return: 0 (Success)
  */
 int main(void)
@@ -11,6 +11,10 @@ int main(void)
 
 	for (letter = 'a'; letter <= 'z'; letter++)
 	{
+		if ((letter == 'q') || (letter == 'e'))
+		{
+			continue;
+		}
 		putchar(letter);
 	}
 	putchar('\n');
